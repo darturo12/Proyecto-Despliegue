@@ -72,11 +72,11 @@ def run_mlflow(run_name="Entrenamiento_XGBoost"):
 
         # 6. Búsqueda de hiperparámetros
         param_grid = {
-            'classifier__n_estimators': [100, 200, 300],
-            'classifier__max_depth': [3, 5, 7],
-            'classifier__learning_rate': [0.01, 0.1, 0.2],
-            'classifier__subsample': [0.7, 0.9, 1.0],
-            'classifier__colsample_bytree': [0.7, 0.9, 1.0]
+            'classifier__n_estimators': [150, 250, 350],
+            'classifier__max_depth': [4, 6, 8],
+            'classifier__learning_rate': [0.02, 0.05, 0.15],
+            'classifier__subsample': [0.75, 0.85, 0.95],
+            'classifier__colsample_bytree': [0.75, 0.85, 0.95]
         }
 
         random_search = RandomizedSearchCV(
@@ -151,7 +151,7 @@ def run_mlflow(run_name="Entrenamiento_XGBoost"):
             registered_model_name="Modelo_ClasificacionV2"
         )
 
-        print(f"\n✅ MLflow Run completado con run_id {runID} y experiment_id {experimentID}")
+        print(f"\nMLflow Run completado con run_id {runID} y experiment_id {experimentID}")
         return experimentID, runID
 
 
