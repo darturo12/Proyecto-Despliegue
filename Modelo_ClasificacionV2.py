@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import argparse
+import os
 import mlflow
 import mlflow.sklearn
 import pandas as pd
@@ -17,8 +18,22 @@ from sklearn.metrics import (
 )
 from xgboost import XGBClassifier
 
-mlflow.set_experiment("Modelo de clasificación")
 
+# ===============================
+# CONFIGURACIÓN DEL TRACKING URI
+# ===============================
+# Opción 1: local (recomendada para EC2)
+os.makedirs("/home/ubuntu/mlruns", exist_ok=True)
+mlflow.set_tracking_uri("file:/home/ubuntu/mlruns")
+
+# (Opción 2: activar si usas Databricks)
+# mlflow.set_tracking_uri("databricks")
+# mlflow.set_experiment("/Users/tu_usuario@databricks.com/Experimentos/Modelo_de_Clasificacion")
+
+# ===============================
+# EXPERIMENTO BASE
+# ===============================
+mlflow.set_experiment("Modelo de clasificación")
 
 parser = argparse.ArgumentParser(description='Entrenamiento XGBoost con MLflow')
 
@@ -28,14 +43,11 @@ parser.add_argument('--cv', '-c', type=int, default=5)
 parser.add_argument('--random_state', '-r', type=int, default=42)
 parser.add_argument('--experiment_name', '-exp', type=str, default="Modelo de clasificación - XGBoost_Suscripcion")
 
-args = parser.parse_args([])  # cambiar [] por None para ejecutar desde terminal
-
+args = parser.parse_args([])  # usar [] para pruebas locales o None desde terminal
 
 
 def run_mlflow(run_name="XGB_pipeline_run"):
-
-    # 1. Configurar MLflow
-    mlflow.set_tracking_uri("file:///content/mlruns")  # cambiar según entorno
+    # Asegurar experimento activo
     mlflow.set_experiment(args.experiment_name)
 
     with mlflow.start_run(run_name=run_name):
@@ -43,7 +55,7 @@ def run_mlflow(run_name="XGB_pipeline_run"):
         experimentID = run.info.experiment_id
         runID = run.info.run_uuid
 
-        # 2. Cargar datos
+        # 1. Cargar datos
         train = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vS60HQztm8Bh9VS0LiK9Uhr9llcpJnxpefPrNKMC7TjWY3PslbhPBLDuc2Pf2t-yzwO6nXOPGpHSdr-/pub?output=csv")
         test = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTuZODZ6QTsYqzReqNm9arsBIc-tusb063SPYCB6riVdpbezq0lZs3mWDIvYVOodjvM4zPe-QekUS5Q/pub?output=csv")
 
@@ -55,7 +67,7 @@ def run_mlflow(run_name="XGB_pipeline_run"):
         num_features = X.select_dtypes(include=[np.number]).columns.tolist()
         cat_features = X.select_dtypes(include='object').columns.tolist()
 
-        # 3. Preprocesamiento
+        # 2. Preprocesamiento
         numeric_transformer = Pipeline([
             ('imputer', SimpleImputer(strategy='median')),
             ('scaler', StandardScaler())
@@ -71,7 +83,7 @@ def run_mlflow(run_name="XGB_pipeline_run"):
             ('cat', categorical_transformer, cat_features)
         ])
 
-        # 4. Pipeline de modelo
+        # 3. Pipeline del modelo
         clf_pipeline = Pipeline([
             ('preprocessor', preprocessor),
             ('classifier', XGBClassifier(
@@ -79,12 +91,12 @@ def run_mlflow(run_name="XGB_pipeline_run"):
             ))
         ])
 
-        # 5. División de datos
+        # 4. División de datos
         X_train, X_valid, y_train, y_valid = train_test_split(
             X, y, test_size=args.test_size, stratify=y, random_state=args.random_state
         )
 
-        # 6. Búsqueda aleatoria de hiperparámetros
+        # 5. Búsqueda aleatoria
         param_grid = {
             'classifier__n_estimators': [100, 200, 300],
             'classifier__max_depth': [3, 5, 7],
@@ -99,14 +111,13 @@ def run_mlflow(run_name="XGB_pipeline_run"):
             random_state=args.random_state
         )
 
-        # 7. Entrenar modelo
         random_search.fit(X_train, y_train)
         best_model = random_search.best_estimator_
 
-        # Log de hiperparámetros
+        # 6. Log de parámetros
         mlflow.log_params(random_search.best_params_)
 
-        # 8. Evaluación
+        # 7. Evaluación
         y_pred_proba = best_model.predict_proba(X_valid)[:, 1]
         y_pred = best_model.predict(X_valid)
 
@@ -117,14 +128,13 @@ def run_mlflow(run_name="XGB_pipeline_run"):
         f1 = f1_score(y_valid, y_pred)
         cm = confusion_matrix(y_valid, y_pred)
 
-        # Log de métricas
         mlflow.log_metric("AUC_ROC", auc)
         mlflow.log_metric("Accuracy", accuracy)
         mlflow.log_metric("Precision", precision)
         mlflow.log_metric("Recall", recall)
         mlflow.log_metric("F1", f1)
 
-        # 9. Importancia de variables
+        # 8. Importancia de variables
         importances = best_model.named_steps['classifier'].feature_importances_
         feature_names = best_model.named_steps['preprocessor'].get_feature_names_out()
         feat_importance = pd.Series(importances, index=feature_names).sort_values(ascending=False)
@@ -138,7 +148,7 @@ def run_mlflow(run_name="XGB_pipeline_run"):
         mlflow.log_artifact("feature_importance.png")
         plt.close()
 
-        # 10. Curva ROC
+        # 9. Curva ROC
         fpr, tpr, _ = roc_curve(y_valid, y_pred_proba)
         plt.plot(fpr, tpr, label=f'AUC = {auc:.4f}')
         plt.plot([0, 1], [0, 1], 'k--')
@@ -151,7 +161,7 @@ def run_mlflow(run_name="XGB_pipeline_run"):
         mlflow.log_artifact("roc_curve.png")
         plt.close()
 
-        # 11. Matriz de confusión
+        # 10. Matriz de confusión
         disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=best_model.classes_)
         disp.plot(cmap='Blues')
         plt.title('Matriz de Confusión')
@@ -159,29 +169,13 @@ def run_mlflow(run_name="XGB_pipeline_run"):
         mlflow.log_artifact("confusion_matrix.png")
         plt.close()
 
-        # 12. Registrar modelo completo
+        # 11. Guardar modelo
         mlflow.sklearn.log_model(best_model, "modelo_xgb_pipeline")
-
-        # 13. Predicciones finales
-        for col in X.columns:
-            if col not in X_test.columns:
-                X_test[col] = np.nan
-        X_test = X_test[X.columns]
-
-        preds_test = best_model.predict_proba(X_test)[:,1]
-
-        #submission = pd.DataFrame({
-        #    'Id': id_test,
-        #    'Predicted': preds_test
-        #})
-        #submission.to_csv("submission.csv", index=False)
-        #mlflow.log_artifact("submission.csv")
 
         mlflow.end_run(status='FINISHED')
         return (experimentID, runID)
 
 
-
 if __name__ == "__main__":
-    (expID, runID) = run_mlflow()
+    expID, runID = run_mlflow()
     print(f"MLflow Run completed with run_id {runID} and experiment_id {expID}")
