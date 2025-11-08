@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import argparse
 import os
 import mlflow
 import mlflow.sklearn
@@ -19,41 +18,15 @@ from sklearn.metrics import (
 from xgboost import XGBClassifier
 
 
-# ===============================
-# CONFIGURACIÓN DEL TRACKING URI
-# ===============================
-# Opción 1: local (recomendada para EC2)
-os.makedirs("/home/ubuntu/mlruns", exist_ok=True)
-mlflow.set_tracking_uri("file:/home/ubuntu/mlruns")
-
-# (Opción 2: activar si usas Databricks)
-# mlflow.set_tracking_uri("databricks")
-# mlflow.set_experiment("/Users/tu_usuario@databricks.com/Experimentos/Modelo_de_Clasificacion")
-
-# ===============================
-# EXPERIMENTO BASE
-# ===============================
-mlflow.set_experiment("Modelo de clasificación")
-
-parser = argparse.ArgumentParser(description='Entrenamiento XGBoost con MLflow')
-
-parser.add_argument('--test_size', '-t', type=float, default=0.3)
-parser.add_argument('--n_iter', '-n', type=int, default=20)
-parser.add_argument('--cv', '-c', type=int, default=5)
-parser.add_argument('--random_state', '-r', type=int, default=42)
-parser.add_argument('--experiment_name', '-exp', type=str, default="Modelo de clasificación - XGBoost_Suscripcion")
-
-args = parser.parse_args([])  # usar [] para pruebas locales o None desde terminal
+mlflow.set_tracking_uri("file:/home/ubuntu/Proyecto-Despliegue/mlruns")
+mlflow.set_experiment("Modelo de clasificación - XGBoost_Suscripcion")
 
 
-def run_mlflow(run_name="XGB_pipeline_run"):
-    # Asegurar experimento activo
-    mlflow.set_experiment(args.experiment_name)
-
-    with mlflow.start_run(run_name=run_name):
-        run = mlflow.active_run()
+def run_mlflow(run_name="Entrenamiento_XGBoost"):
+    with mlflow.start_run(run_name=run_name) as run:
+        # IDs de referencia
         experimentID = run.info.experiment_id
-        runID = run.info.run_uuid
+        runID = run.info.run_id
 
         # 1. Cargar datos
         train = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vS60HQztm8Bh9VS0LiK9Uhr9llcpJnxpefPrNKMC7TjWY3PslbhPBLDuc2Pf2t-yzwO6nXOPGpHSdr-/pub?output=csv")
@@ -61,13 +34,12 @@ def run_mlflow(run_name="XGB_pipeline_run"):
 
         y = train['Subscription']
         X = train.drop(columns=['Subscription'])
-        id_test = test.iloc[:, 0]
-        X_test = test.copy()
 
+        # 2. Identificar tipos de variables
         num_features = X.select_dtypes(include=[np.number]).columns.tolist()
         cat_features = X.select_dtypes(include='object').columns.tolist()
 
-        # 2. Preprocesamiento
+        # 3. Preprocesamiento
         numeric_transformer = Pipeline([
             ('imputer', SimpleImputer(strategy='median')),
             ('scaler', StandardScaler())
@@ -83,20 +55,22 @@ def run_mlflow(run_name="XGB_pipeline_run"):
             ('cat', categorical_transformer, cat_features)
         ])
 
-        # 3. Pipeline del modelo
+        # 4. Pipeline con modelo
         clf_pipeline = Pipeline([
             ('preprocessor', preprocessor),
             ('classifier', XGBClassifier(
-                use_label_encoder=False, eval_metric='logloss', random_state=args.random_state
+                use_label_encoder=False,
+                eval_metric='logloss',
+                random_state=42
             ))
         ])
 
-        # 4. División de datos
+        # 5. División de datos
         X_train, X_valid, y_train, y_valid = train_test_split(
-            X, y, test_size=args.test_size, stratify=y, random_state=args.random_state
+            X, y, test_size=0.3, stratify=y, random_state=42
         )
 
-        # 5. Búsqueda aleatoria
+        # 6. Búsqueda de hiperparámetros
         param_grid = {
             'classifier__n_estimators': [100, 200, 300],
             'classifier__max_depth': [3, 5, 7],
@@ -106,33 +80,33 @@ def run_mlflow(run_name="XGB_pipeline_run"):
         }
 
         random_search = RandomizedSearchCV(
-            clf_pipeline, param_distributions=param_grid,
-            n_iter=args.n_iter, scoring='roc_auc', cv=args.cv, verbose=2,
-            random_state=args.random_state
+            clf_pipeline,
+            param_distributions=param_grid,
+            n_iter=20,
+            scoring='roc_auc',
+            cv=5,
+            verbose=1,
+            random_state=42
         )
 
         random_search.fit(X_train, y_train)
         best_model = random_search.best_estimator_
 
-        # 6. Log de parámetros
+        # 7. Log de parámetros y métricas
         mlflow.log_params(random_search.best_params_)
 
-        # 7. Evaluación
         y_pred_proba = best_model.predict_proba(X_valid)[:, 1]
         y_pred = best_model.predict(X_valid)
 
-        auc = roc_auc_score(y_valid, y_pred_proba)
-        accuracy = accuracy_score(y_valid, y_pred)
-        precision = precision_score(y_valid, y_pred)
-        recall = recall_score(y_valid, y_pred)
-        f1 = f1_score(y_valid, y_pred)
-        cm = confusion_matrix(y_valid, y_pred)
+        metrics = {
+            "AUC_ROC": roc_auc_score(y_valid, y_pred_proba),
+            "Accuracy": accuracy_score(y_valid, y_pred),
+            "Precision": precision_score(y_valid, y_pred),
+            "Recall": recall_score(y_valid, y_pred),
+            "F1": f1_score(y_valid, y_pred)
+        }
 
-        mlflow.log_metric("AUC_ROC", auc)
-        mlflow.log_metric("Accuracy", accuracy)
-        mlflow.log_metric("Precision", precision)
-        mlflow.log_metric("Recall", recall)
-        mlflow.log_metric("F1", f1)
+        mlflow.log_metrics(metrics)
 
         # 8. Importancia de variables
         importances = best_model.named_steps['classifier'].feature_importances_
@@ -150,7 +124,7 @@ def run_mlflow(run_name="XGB_pipeline_run"):
 
         # 9. Curva ROC
         fpr, tpr, _ = roc_curve(y_valid, y_pred_proba)
-        plt.plot(fpr, tpr, label=f'AUC = {auc:.4f}')
+        plt.plot(fpr, tpr, label=f"AUC = {metrics['AUC_ROC']:.4f}")
         plt.plot([0, 1], [0, 1], 'k--')
         plt.xlabel('Tasa Falsos Positivos')
         plt.ylabel('Tasa Verdaderos Positivos')
@@ -162,6 +136,7 @@ def run_mlflow(run_name="XGB_pipeline_run"):
         plt.close()
 
         # 10. Matriz de confusión
+        cm = confusion_matrix(y_valid, y_pred)
         disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=best_model.classes_)
         disp.plot(cmap='Blues')
         plt.title('Matriz de Confusión')
@@ -169,13 +144,17 @@ def run_mlflow(run_name="XGB_pipeline_run"):
         mlflow.log_artifact("confusion_matrix.png")
         plt.close()
 
-        # 11. Guardar modelo
-        mlflow.sklearn.log_model(best_model, "modelo_xgb_pipeline")
+        # 11. Guardar modelo completo (pipeline)
+        mlflow.sklearn.log_model(
+            best_model,
+            artifact_path="modelo_xgb_pipeline",
+            registered_model_name="Modelo_ClasificacionV2"
+        )
 
-        mlflow.end_run(status='FINISHED')
-        return (experimentID, runID)
+        print(f"\n✅ MLflow Run completado con run_id {runID} y experiment_id {experimentID}")
+        return experimentID, runID
 
 
 if __name__ == "__main__":
     expID, runID = run_mlflow()
-    print(f"MLflow Run completed with run_id {runID} and experiment_id {expID}")
+    print(f"Ejecutado correctamente en experimento ID: {expID}")
