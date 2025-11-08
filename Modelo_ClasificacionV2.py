@@ -18,21 +18,10 @@ from sklearn.metrics import (
 )
 from xgboost import XGBClassifier
 
-
-# ===============================
-# CONFIGURACIÓN DEL TRACKING URI
-# ===============================
-# Opción 1: local (recomendada para EC2)
 os.makedirs("/home/ubuntu/mlruns", exist_ok=True)
 mlflow.set_tracking_uri("file:/home/ubuntu/mlruns")
 
-# (Opción 2: activar si usas Databricks)
-# mlflow.set_tracking_uri("databricks")
-# mlflow.set_experiment("/Users/tu_usuario@databricks.com/Experimentos/Modelo_de_Clasificacion")
 
-# ===============================
-# EXPERIMENTO BASE
-# ===============================
 mlflow.set_experiment("Modelo de clasificación")
 
 parser = argparse.ArgumentParser(description='Entrenamiento XGBoost con MLflow')
