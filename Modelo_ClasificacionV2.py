@@ -53,7 +53,7 @@ def run_mlflow(run_name="XGB_pipeline_run"):
     with mlflow.start_run(run_name=run_name):
         run = mlflow.active_run()
         experimentID = run.info.experiment_id
-        runID = run.info.run_uuid
+        runID = run.info.run_id
 
         # 1. Cargar datos
         train = pd.read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vS60HQztm8Bh9VS0LiK9Uhr9llcpJnxpefPrNKMC7TjWY3PslbhPBLDuc2Pf2t-yzwO6nXOPGpHSdr-/pub?output=csv")
