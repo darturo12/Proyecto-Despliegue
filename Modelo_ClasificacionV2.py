@@ -72,7 +72,7 @@ def run_mlflow(run_name="Entrenamiento_XGBoost"):
 
         # 6. Búsqueda de hiperparámetros
         param_grid = {
-            'classifier__n_estimators': [50, 150, 250],
+            'classifier__n_estimators': [600, 900, 1200, 1500],
             'classifier__max_depth': [2, 4, 6],
             'classifier__learning_rate': [0.05, 0.1, 0.25],
             'classifier__subsample': [0.6, 0.8, 1.0],

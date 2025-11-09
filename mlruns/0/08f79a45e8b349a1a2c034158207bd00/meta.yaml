@@ -1,0 +1,14 @@
+artifact_uri: file:///Users/jose.alvarado/Documents/Despliegue/Proyecto-Despliegue/mlruns/0/08f79a45e8b349a1a2c034158207bd00/artifacts
+end_time: 1762657550340
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 08f79a45e8b349a1a2c034158207bd00
+run_name: Entrenamiento_XGBoost
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1762657508095
+status: 3
+tags: []
+user_id: jose.alvarado

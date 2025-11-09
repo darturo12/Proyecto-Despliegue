@@ -1,0 +1,15 @@
+creation_timestamp: 1762657550333
+current_stage: None
+deployment_job_state: null
+description: null
+last_updated_timestamp: 1762657550333
+model_id: m-cc0fc5cb7778475daf6cd2d8e8778841
+name: Modelo_ClasificacionV2
+run_id: 08f79a45e8b349a1a2c034158207bd00
+run_link: null
+source: models:/m-cc0fc5cb7778475daf6cd2d8e8778841
+status: READY
+status_message: null
+storage_location: file:///Users/jose.alvarado/Documents/Despliegue/Proyecto-Despliegue/mlruns/0/models/m-cc0fc5cb7778475daf6cd2d8e8778841/artifacts
+user_id: null
+version: 1

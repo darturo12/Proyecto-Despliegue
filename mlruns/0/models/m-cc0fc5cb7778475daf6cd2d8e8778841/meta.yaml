@@ -1,0 +1,10 @@
+artifact_location: file:///Users/jose.alvarado/Documents/Despliegue/Proyecto-Despliegue/mlruns/0/models/m-cc0fc5cb7778475daf6cd2d8e8778841/artifacts
+creation_timestamp: 1762657546400
+experiment_id: '0'
+last_updated_timestamp: 1762657550313
+model_id: m-cc0fc5cb7778475daf6cd2d8e8778841
+model_type: null
+name: modelo_xgb_pipeline
+source_run_id: 08f79a45e8b349a1a2c034158207bd00
+status: 2
+status_message: null
