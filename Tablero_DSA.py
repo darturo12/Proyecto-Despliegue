@@ -5,7 +5,7 @@ import dash
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-# ========= Estilos personalizados =========
+
 COLORS = {
     'primary': '#1e3a8a',
     'secondary': '#3b82f6',
@@ -34,7 +34,7 @@ header_style = {
     'boxShadow': '0 4px 6px rgba(0,0,0,0.1)'
 }
 
-# ========= Helper para crear grupos de botones =========
+
 def crear_grupo_botones(titulo, opciones, grupo_id):
     return dbc.Col([
         html.Label(titulo, className="fw-semibold mb-2", style={'color': COLORS['text'], 'fontSize': '13px'}),
@@ -51,7 +51,7 @@ def crear_grupo_botones(titulo, opciones, grupo_id):
         ),
     ], lg=3, md=4, sm=6, xs=12, className="mb-3")
 
-# ========= Helper para crear slider con estilo =========
+
 def crear_slider_section(label, id_base, min_val, max_val, step, default, marks):
     return dbc.Col([
         html.Div([
@@ -67,7 +67,7 @@ def crear_slider_section(label, id_base, min_val, max_val, step, default, marks)
         )
     ], lg=4, md=6, xs=12, className="mb-4")
 
-# ========= Función para crear gráficos con estilo moderno =========
+
 def crear_grafico(x_data, y_data, titulo, x_label, y_label):
     fig = go.Figure()
     
@@ -98,9 +98,9 @@ def crear_grafico(x_data, y_data, titulo, x_label, y_label):
     
     return fig
 
-# ========= Layout =========
+
 app.layout = dbc.Container([
-    # Header
+   
     html.Div([
         html.H1("Tablero de Preevaluación de Campañas", 
                 className="mb-2 fw-bold", 
@@ -110,13 +110,13 @@ app.layout = dbc.Container([
                style={'fontSize': '15px'})
     ], style=header_style),
 
-    # Sección de características del cliente
+
     html.Div([
         html.H5("Características del Cliente Tipo", 
                 className="mb-4 fw-semibold d-flex align-items-center",
                 style={'color': COLORS['primary']}),
         
-        # Grupo 1: Información demográfica
+
         html.H6("Información Demográfica", className="text-muted mb-3 mt-2", style={'fontSize': '14px'}),
         dbc.Row([
             crear_grupo_botones("Tipo de Empleo", [
@@ -129,7 +129,7 @@ app.layout = dbc.Container([
         
         html.Hr(className="my-4", style={'borderColor': COLORS['border']}),
         
-        # Grupo 2: Información financiera
+
         html.H6("Información Financiera y de Contacto", className="text-muted mb-3", style={'fontSize': '14px'}),
         dbc.Row([
             crear_grupo_botones("Productos Crediticios", ["yes", "no"], "creditos"),
@@ -140,7 +140,7 @@ app.layout = dbc.Container([
         
         html.Hr(className="my-4", style={'borderColor': COLORS['border']}),
         
-        # Grupo 3: Información de campaña
+
         html.H6("Información de Campaña", className="text-muted mb-3", style={'fontSize': '14px'}),
         dbc.Row([
             crear_grupo_botones("Resultado Última Campaña", ["success", "failure", "other", "unknown"], "resultado"),
@@ -151,7 +151,7 @@ app.layout = dbc.Container([
         ]),
     ], style=card_style, className="mb-4"),
 
-    # Sección de variables continuas
+
     html.Div([
         html.H5("Variables Continuas", 
                 className="mb-4 fw-semibold",
@@ -174,7 +174,7 @@ app.layout = dbc.Container([
         ]),
     ], style=card_style, className="mb-4"),
 
-    # Botón Evaluar
+
     html.Div([
         dbc.Button(
             [
@@ -195,14 +195,14 @@ app.layout = dbc.Container([
         )
     ], className="text-center mb-4"),
 
-    # Sección de análisis de resultados
+
     html.Div([
         html.H5("Análisis de Resultados", 
                 className="mb-4 fw-semibold",
                 style={'color': COLORS['primary']}),
         
         dbc.Row([
-            # Card de probabilidad destacada
+
             dbc.Col([
                 html.Div([
                     html.Div([
@@ -226,7 +226,7 @@ app.layout = dbc.Container([
                 })
             ], lg=3, md=12, className="mb-3"),
             
-            # Gráficos
+
             dbc.Col([
                 dcc.Graph(
                     figure=crear_grafico(
@@ -255,7 +255,7 @@ app.layout = dbc.Container([
         ]),
     ], style=card_style, className="mb-4"),
 
-    # Recomendaciones
+
     html.Div([
         html.Div([
             html.I(className="bi bi-lightbulb-fill me-2", style={'color': COLORS['accent']}),
@@ -281,7 +281,7 @@ app.layout = dbc.Container([
 ], fluid=True, style={'backgroundColor': COLORS['background'], 'padding': '32px', 'minHeight': '100vh'})
 
 
-# ========= Callbacks para actualizar valores de sliders =========
+
 @app.callback(Output("edad-val", "children"), Input("edad-slider", "value"))
 def update_edad(v): return f"{v} años"
 
@@ -301,7 +301,7 @@ def update_dias(v): return f"{v} días"
 def update_cont(v): return v
 
 
-# ========= Callbacks para manejar estado de botones =========
+
 def crear_callback_botones(grupo_id, opciones):
     """Crea callback para un grupo de botones"""
     outputs = [Output(f"{grupo_id}_{op.replace(' ', '_').replace('-', '_')}", "outline") for op in opciones]
@@ -320,17 +320,17 @@ def crear_callback_botones(grupo_id, opciones):
         for op in opciones:
             button_id = f"{grupo_id}_{op.replace(' ', '_').replace('-', '_')}"
             if button_id == clicked_id:
-                results_outline.append(False)  # Sin outline = botón sólido
+                results_outline.append(False)  
                 results_color.append("primary")
             else:
-                results_outline.append(True)   # Con outline = botón vacío
+                results_outline.append(True)   
                 results_color.append("primary")
         
         return results_outline + results_color
     
     return toggle_buttons
 
-# Crear callbacks para cada grupo de botones
+
 crear_callback_botones("empleo", [
     "management", "technician", "entrepreneur", "blue-collar", "retired", "services",
     "admin", "self-employed", "unemployed", "housemaid", "student", "unknown"
