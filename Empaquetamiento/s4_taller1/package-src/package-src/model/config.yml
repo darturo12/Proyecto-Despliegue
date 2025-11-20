@@ -1,0 +1,66 @@
+# Nombre del paquete
+package_name: modelo-sucripcion-bancaria
+
+# Archivos de datos
+train_data_file: Train bank.csv
+test_data_file: Test bank.csv
+
+# Variable objetivo
+target: Subscription   # Ya viene como 0/1 → NO se mapea
+
+# Variables predictoras
+features:
+  - Age
+  - Job
+  - Marital.Status
+  - Education
+  - Credit
+  - Balance.euros.
+  - Housing.Loan
+  - Personal.Loan
+  - Contact
+  - Last.Contact.Day
+  - Last.Contact.Month
+  - Last.Contact.Duration
+  - Campaign
+  - Pdays
+  - Previous
+  - Poutcome
+
+temp_features: []
+
+# pipelines
+pipeline_name: modelo-sucripcion-bancaria
+pipeline_save_file: modelo-sucripcion-output
+
+# fracción del conjunto de prueba
+test_size: 0.30
+
+# semilla
+random_state: 42
+
+# hiperparámetros del modelo 
+n_estimators: 350
+colsample_bytree: 0.75
+learning_rate: 0.02
+subsample: 0.75
+max_depth: 6
+
+# variables categóricas (PREDICTORAS)
+categorical_vars:
+  - Job
+  - Marital.Status
+  - Education
+  - Credit
+  - Housing.Loan
+  - Personal.Loan
+  - Contact
+  - Last.Contact.Month
+  - Poutcome
+
+# variables a mapear (si alguna categórica necesita conversión)
+qual_vars: []
+
+# mapeos (no requeridos por ahora)
+qual_mappings: {}
+
