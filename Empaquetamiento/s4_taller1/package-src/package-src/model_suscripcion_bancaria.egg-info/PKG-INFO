@@ -1,0 +1,35 @@
+Metadata-Version: 2.4
+Name: model-suscripcion-bancaria
+Version: 0.0.1
+Summary: Proyecto de modelo de suscripción bancaria para la materia de Despliegue de modelos
+Home-page: 
+Author: darturomartinez
+Author-email: da.martinezm12@uniandes.edu.co
+License: BSD-3
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Requires-Python: >=3.10.0
+Description-Content-Type: text/markdown
+Requires-Dist: numpy<2.0.0,>=1.23.0
+Requires-Dist: pandas<3.0.0,>=2.0.0
+Requires-Dist: scikit-learn<1.3.3,>=1.3.2
+Requires-Dist: joblib<2.0.0,>=1.1.0
+Requires-Dist: pydantic<2.0.0,>=1.10.0
+Requires-Dist: strictyaml<2.0.0,>=1.7.0
+Requires-Dist: feature-engine<2.0.0,>=1.6.1
+Requires-Dist: xgboost==3.1.2
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+Proyecto de modelo de suscripción bancaria para la materia de Despliegue de modelos

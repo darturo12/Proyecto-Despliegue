@@ -1,0 +1,28 @@
+MANIFEST.in
+pyproject.toml
+setup.py
+model/VERSION
+model/__init__.py
+model/config.yml
+model/pipeline.py
+model/predict.py
+model/train_pipeline.py
+model/config/__init__.py
+model/config/core.py
+model/datasets/Test bank.csv
+model/datasets/Train bank.csv
+model/datasets/__init__.py
+model/processing/__init__.py
+model/processing/data_manager.py
+model/processing/features.py
+model/processing/validation.py
+model/trained/__init__.py
+model/trained/modelo-sucripcion-output0.0.1.pkl
+model_suscripcion_bancaria.egg-info/PKG-INFO
+model_suscripcion_bancaria.egg-info/SOURCES.txt
+model_suscripcion_bancaria.egg-info/dependency_links.txt
+model_suscripcion_bancaria.egg-info/requires.txt
+model_suscripcion_bancaria.egg-info/top_level.txt
+requirements/requirements.txt
+requirements/test_requirements.txt
+tests/test_prediction.py

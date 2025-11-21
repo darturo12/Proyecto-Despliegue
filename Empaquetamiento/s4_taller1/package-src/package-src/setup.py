@@ -42,7 +42,14 @@ setup(
     python_requires=REQUIRES_PYTHON,
     url=URL,
     packages=find_packages(exclude=("tests",)),
-    package_data={"model": ["VERSION"]},
+    package_data={
+    "model": [
+        "VERSION",
+        "config.yml",
+        "datasets/*.csv",
+        "trained/*.pkl"
+    ]
+},
     install_requires=list_reqs(),
     extras_require={},
     include_package_data=True,
