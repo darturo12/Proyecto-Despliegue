@@ -1,4 +1,4 @@
-modelo-sucripcion-bancaria @ file://../model_suscripcion_bancaria-0.0.1-py3-none-any.whl
+model-pkg/model_suscripcion_bancaria-0.0.1-py3-none-any.whl
 scikit-learn==1.3.2
 uvicorn>=0.20.0,<0.30.0
 fastapi>=0.88.0,<1.0.0
